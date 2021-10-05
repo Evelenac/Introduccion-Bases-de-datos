@@ -1,0 +1,93 @@
+#Sesion 3
+# SELECT * FROM Tabla1 T1 JOIN Tabla2 T2 ON T1.B = T2.B;
+#SHOW KEYS FROM venta;
+
+USE tienda;
+SHOW KEYS FROM venta;
+
+SELECT * FROM empleado e JOIN puesto p ON e.id_puesto = p.id_puesto;
+
+SELECT * FROM puesto p LEFT JOIN empleado e ON p.id_puesto = e.id_puesto;
+
+SELECT * FROM empleado AS e RIGHT JOIN puesto AS p ON e.id_puesto = p.id_puesto;
+
+#1.Empleados que realizaron cada venta
+SELECT id_venta,nombre FROM venta v LEFT JOIN empleado e ON v.id_empleado = e.id_empleado;
+#2.Nombre de articulos vendidos
+SELECT nombre FROM venta v LEFT JOIN articulo a ON v.id_articulo = a.id_articulo group by a.id_articulo;
+SELECT clave, nombre FROM venta AS v JOIN articulo AS a ON v.id_articulo = a.id_articulo ORDER BY clave;
+#3.Total de cada venta
+SELECT clave, round(sum(precio),2) AS total FROM venta AS v JOIN articulo AS a ON v.id_articulo = a.id_articulo GROUP BY clave ORDER BY clave;
+
+#Vistas
+#ID: 978
+CREATE VIEW tickets_978 AS
+(SELECT v.clave, v.fecha, a.nombre producto, a.precio, concat(e.nombre, ' ', e.apellido_paterno) empleado 
+FROM venta v
+JOIN empleado e
+  ON v.id_empleado = e.id_empleado
+JOIN articulo a
+  ON v.id_articulo = a.id_articulo);
+  
+ SELECT * FROM tickets_978 ;
+ ##Retos##
+CREATE VIEW nombre_puestos_978 AS (SELECT e.nombre as empleado,p.nombre as puesto FROM empleado e JOIN puesto p);
+CREATE VIEW ventas_empleado_978 AS (SELECT e.nombre as empleado, a.nombre as articulo FROM venta AS v JOIN articulo AS a ON v.id_articulo = a.id_articulo JOIN empleado AS e ON e.id_empleado = v.id_empleado ORDER BY e.id_empleado);
+
+CREATE VIEW puesto_ventas_978 AS SELECT p.nombre, count(v.clave) total FROM venta v JOIN empleado e ON v.id_empleado = e.id_empleado JOIN puesto p ON e.id_puesto = p.id_puesto GROUP BY p.nombre;
+SELECT * FROM puesto_ventas_978 ORDER BY total DESC LIMIT 1;
+
+#Ejercicios
+USE classicmodels;
+
+#1 daniel
+SELECT e.orderNumber, p.productname, e.quantityordered FROM orderdetails AS e JOIN products AS p ON e.productCode = p.productCode;
+
+SELECT o.orderNumber num_order, sum(od.quantityOrdered) cantidad_ordenada
+FROM orders o
+JOIN orderdetails od
+  ON o.orderNumber = od.orderNumber
+GROUP BY o.orderNumber;
+
+#2
+SELECT o.orderNumber AS "# orden", o.status AS "estado", p.amount AS "costo"
+FROM payments AS p
+JOIN orders AS o
+   ON p.customerNumber = o.customerNumber;
+   #Jesus
+   SELECT o.orderNumber AS "# orden", o.status AS "estado", sum(p.amount) AS "costo"
+	FROM payments AS p
+	JOIN orders AS o
+	ON p.customerNumber = o.customerNumber
+	group by  o.orderNumber;
+
+
+#3 
+SELECT o.orderNumber, o.orderDate, od.orderLineNumber,od.quantityOrdered, od.priceEach FROM orders o JOIN orderdetails od ON o.orderNumber = od.orderNumber;
+
+#4
+
+#5
+SELECT cs.customerNumber num_cliente, concat(cs.contactFirstName,' ',cs.contactLastName) cliente,
+od.orderNumber num_order, od.status estado
+FROM customers cs
+LEFT  JOIN payments py
+  ON cs.customerNumber = py.customerNumber
+LEFT JOIN orders od
+  ON cs.customerNumber = od.customerNumber;
+
+#6
+SELECT cs.customerNumber num_cliente, concat(cs.contactFirstName,' ',cs.contactLastName) cliente,
+od.orderNumber num_order, od.status estado
+FROM customers cs
+LEFT  JOIN payments py
+  ON cs.customerNumber = py.customerNumber
+LEFT JOIN orders od
+  ON cs.customerNumber = od.customerNumber
+WHERE od.orderNumber IS NULL;
+SELECT od.orderNumber Num_orden, pr.productName Nombre, pr.MSRP precio_sugerido,
+od.priceEach precio_pieza
+FROM orderdetails AS od
+JOIN products AS pr
+   ON od.productCode = pr.productCode
+ORDER BY od.orderNumber;
